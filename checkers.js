@@ -125,7 +125,7 @@ function checkJump(moves, jumps, piece, x, y) {
   * @param {integer} cx - the 'capture' x position the piece is jumping over
   * @param {integer} cy - the 'capture' y position of the peice is jumping over
   * @param {integer} lx - the 'landing' x position the piece is jumping onto
-  * @param {integer} ly - the 'landing' y position of the peice is jumping onto
+  * @param {integer} ly - the 'landing' y position of the piece is jumping onto
   */
 function checkLanding(moves, jumps, piece, cx, cy, lx, ly) {
   // Check landing square is on grid
@@ -133,8 +133,8 @@ function checkLanding(moves, jumps, piece, cx, cy, lx, ly) {
   // Check landing square is unoccupied
   if(state.board[ly][lx]) return;
   // Check capture square is occuped by opponent
-  if(piece == 'b' || 'bk' && state.board[cy][cx] != 'w' || state.board[cy][cx] != 'wk') return;
-  if(piece == 'w' || 'wk' && state.board[cy][cx] != 'b' || state.board[cy][cx] != 'bk') return;
+  if(piece == 'b' || piece == 'bk' && state.board[cy][cx] != 'w' || state.board[cy][cx] != 'wk') return;
+  if(piece == 'w' || piece == 'wk' && state.board[cy][cx] != 'b' || state.board[cy][cx] != 'bk') return;
   // legal jump! add it to the moves list
   jumps.captures.push({x: cx, y: cy});
   jumps.landings.push({x: lx, y: ly});
@@ -149,10 +149,66 @@ function checkLanding(moves, jumps, piece, cx, cy, lx, ly) {
 
 /** @function ApplyMove
   * A function to apply the selected move to the game
+  * @param {int} x - start pos
+  * @param {int} y - start pos
   * @param {object} move - the move to apply.
   */
-function applyMove(move) {
-  // TODO: Apply the move
-  // TODO: Check for victory
-  // TODO: Start the next turn
+function applyMove(x, y, move) {
+  if (move.type === "slide") {
+    state.board[move.y][move.x] = state.board[y][x];
+    state.board[y][x] = null;
+  } else if (move.type === "jump") {
+    for (let capture of move.captures) {
+      state.board[capture.y][capture.x] = null;
+    }
+
+    let last = move.landings[move.landings.length-1];
+    state.board[last.y][last.x] = state.board[y][x];
+    state.board[y][x] = null;
+  }
+}
+
+// TODO: Check for victory
+function checkForVictory() {
+  var sums = {"w": 0, "b": 0};
+  for (let l of state.board)
+    for (let p of l)
+      if (p !== null)
+        sums[p]++;
+
+  if (sums["w"] == 0) {
+    state.over = true;
+    return "white wins";
+  }
+
+  if (sums["b"] == 0) {
+    state.over = true;
+    return "black wins"
+  }
+
+  return null;
+}
+
+// Start the next turn
+function nextTurn() {
+  if (state.turn === 'b') state.turn = 'w';
+  else state.turn = 'b';
+}
+
+function printBoard() {
+  var out = "";
+
+  for (let line of state.board) {
+    for (let char of line) {
+      if (char === null)
+        out += " ";
+      else
+        out += char;
+    }
+
+    out += "\n";
+  }
+
+  console.log(out);
+  return out;
 }
