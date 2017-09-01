@@ -181,32 +181,32 @@ function applyMove(x, y, move) {
     }
 }
 
-+/** @function checkForVictory
+/** @function checkForVictory
    * Checks to see if a victory has been actived
    * (All peices of one color have been captured)
    * @return {String} one of three values:
    * "White wins", "Black wins", or null, if neither
    * has yet won.
    */
-    function checkForVictory() {
-        var sums = { "w": 0, "b": 0 };
-        for (let l of state.board)
-            for (let p of l)
-                if (p !== null)
-                    sums[p]++;
+function checkForVictory() {
+    var sums = { "w": 0, "b": 0 };
+    for (let l of state.board)
+        for (let p of l)
+            if (p !== null)
+                sums[p]++;
 
-        if (sums["w"] == 0) {
-            state.over = true;
-            return "white wins";
-        }
-
-        if (sums["b"] == 0) {
-            state.over = true;
-            return "black wins"
-        }
-
-        return null;
+    if (sums["w"] == 0) {
+        state.over = true;
+        return "white wins";
     }
+
+    if (sums["b"] == 0) {
+        state.over = true;
+        return "black wins"
+    }
+
+    return null;
+}
 
 /** @function nextTurn()
   * Starts the next turn by changing the
@@ -266,7 +266,7 @@ function main() {
         var res = /([a-jA-J]),?\s?([0-9])/.exec(answer);
         if (res === null) {
             console.log("Invalid input!");
-            // TODO
+            main();
         }
 
         var [x, y] = [alphabet.indexOf(res[1].toLowerCase()), parseInt(res[2] - '0')];
@@ -275,7 +275,7 @@ function main() {
 
         if (moves.length === 0) {
             console.log("\nNo legal moves for ", piece, "at", x, ",", y);
-            // TODO
+            main();
         }
 
         console.log("Possible moves:");
@@ -283,16 +283,27 @@ function main() {
         var index = 1;
         for (let move of moves) {
             if (move.type === 'slide') {
-                board[move.y+1] = board[move.y+1].replaceAt(move.x*2+2, "x");
+                board[move.y+1] = board[move.y+1].replaceAt(move.x*2+2, ""+index);
                 console.log(index + ". You can slide to " + String.fromCharCode(97 + move.x) + "," + move.y);
             } else if (move.type === 'jump') {
                 var last = move.landings[move.landings.length-1];
-                board[last.y+1] = board[last.y+1].replaceAt(last.x*2+2, "X");
+                board[last.y+1] = board[last.y+1].replaceAt(last.x*2+2, ""+index);
                 console.log(index + ". You can " + getJumpString(move));
             }
             index++;
         }
+        console.log("c. Cancel");
         console.log(board.join("\n"));
+
+        rl.question("Pick a move from the list: ", (answer) => {
+            var command = parseInt(answer.substring(0,1));
+            if (command === 'c') main();
+            if (isNaN(command) || command > moves.length) main();
+            applyMove(x, y, moves[command-1]);
+            checkForVictory();
+            nextTurn();
+            main();
+        });
 
     });
 }
