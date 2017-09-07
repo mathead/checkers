@@ -197,3 +197,41 @@ function nextTurn() {
   if(state.turn === 'b') state.turn = 'w';
   else state.turn = 'b';
 }
+
+function handleCheckerClick(event) {
+  event.preventDefault();
+  var squareId = evenet.target.id;
+  console.log(squareId);
+  let (x, y) = (parseInt(squareId.getCharacterAt(7)), parseInt(squareId.getCharacterAt(9)));
+  var moves = getLegalMoves(state.board[y][x], x, y);
+}
+
+/** @function setup
+ * Sets up game environment in DOM
+ */
+function setup() {
+  var board = document.createElement('section');
+  board.id = 'game-board';
+  document.body.appendChild(board);
+  for (var y = 0; y < state.board.length; y++) {
+    for (var x = 0; x < state.board[y].length; x++) {
+      var square = document.createElement('div');
+      square.id = 'square-' + x + "-" + y;
+      square.classList.add('square');
+      if ((x+y) % 2 == 1)
+        square.classList.add('black')
+      board.appendChild(square);
+
+      if (state.board[y][x] === 'w')
+        square.innerHTML = "&#9817;";
+      else if (state.board[y][x] === 'b')
+        square.innerHTML = "&#9823;";
+
+      if (state.board[y][x] !== null) {
+        square.classList.add('piece');
+      }
+    }
+  }
+}
+
+setup();

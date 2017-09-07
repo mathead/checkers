@@ -1,1 +1,27 @@
 /* checkers.css */
+#game-board {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 1020px;
+    height: 1020px;
+}
+
+.square {
+    border: 1px solid black;
+    width: 100px;
+    height: 100px;
+    line-height: 107px;
+    font-size: 100px;
+    text-align: center;
+    vertical-align: center;
+}
+
+.black {
+    background-color: brown;
+}
+
+.piece {
+    cursor: pointer;    
+}
