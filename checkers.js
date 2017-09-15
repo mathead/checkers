@@ -21,6 +21,7 @@ var state = {
 }
 
 var ctx;
+var canvas;
 
 /** @function getLegalMoves
   * returns a list of legal moves for the specified
@@ -249,29 +250,23 @@ function renderBoard() {
 }
 
 function handleMouseMove(event) {
-  renderBoard();
-  switch(state.action) {
+  switch (state.action) {
     case 'idle':
       hoverOverChecker(event);
       break;
-    case 'dragging':
+    case 'drag':
+      
       break;
   }
 }
 
-/** @function hoverOverChecker
-  * Event handler for when a player is deciding
-  * where to move.
-  */
 function hoverOverChecker(event) {
   // Make sure we have a canvas context to render to
   if(!ctx) return;
-  var x = Math.floor(event.clientX / 50);
-  var y = Math.floor(event.clientY / 50);
-  // Adjust for scrolling
-  // Avoid array out-of-bounds issues.
-  if(x < 0 || y < 0 || x > 9 || y > 9) return;
-  // Make sure we're over the current player
+  renderBoard();
+  var x = Math.floor(event.clientX / canvas.offsetWidth * 10);
+  var y = Math.floor(event.clientY / canvas.offsetHeight * 10);
+  // console.log(x, y);
   if(state.board[y][x] && state.board[y][x].charAt(0) === state.turn) {
     // Highlight the checker to move
     ctx.strokeWidth = 15;
@@ -284,7 +279,7 @@ function hoverOverChecker(event) {
 }
 
 function setup() {
-  var canvas = document.createElement('canvas');
+  canvas = document.createElement('canvas');
   canvas.width = 1000;
   canvas.height = 1000;
   canvas.onmousemove = handleMouseMove;
