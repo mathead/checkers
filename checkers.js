@@ -5,6 +5,7 @@ var state = {
   action: 'idle',
   over: false,
   turn: 'b',
+  movingPiece: null.
   board: [
     [null,'w',null, 'w', null, 'w',  null, 'w',  null, 'w'],
     ['w',null,'w',null,'w',null,'w',null,'w',null],
@@ -249,14 +250,70 @@ function renderBoard() {
   }
 }
 
+function renderDragging() {
+  renderBoard();
+
+  var {x, y} = state.movingPiece.startPosition;
+  ctx.fillStyle = '#555';
+  ctx.beginPath();
+  ctx.arc(x*100+50, y*100+50, 40, 0, Math.PI * 2);
+  ctx.fill();
+
+  var {x, y} = state.movingPiece.currentPosition
+  ctx.strokeStyle = 'yellow';
+  ctx.beginPath();
+  ctx.arc(x*100+50, y*100+50, 40, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function getBoardPos(event) {
+  var x = Math.floor(event.clientX / canvas.offsetWidth * 10);
+  var y = Math.floor(event.clientY / canvas.offsetHeight * 10);
+  return {x, y}
+}
+
 function handleMouseMove(event) {
   switch (state.action) {
     case 'idle':
       hoverOverChecker(event);
       break;
-    case 'drag':
-      
+    case 'dragging':
+      state.movingPiece.currentPosition = getBoardPos(event);
+      renderDragging();
       break;
+  }
+}
+
+function handleMouseDown(event) {
+  var {x, y} = getBoardPos(event);
+  if (x < 0 || y < 0 || x > 9 || y > 9) return;
+
+  if (!state.board[y][x] || state.board[y][x].charAt(0) !== state.turn) 
+    return;
+
+  state.movingPiece = {
+    startPosition: {x: x, y: y},
+    currentPosition: {x: x, y: y},
+    piece: state.board[y][x],
+  }
+  state.board[y][x] = null;
+  state.action = 'dragging';
+  renderBoard();
+}
+
+function handleMouseUp(event) {
+  if (state.action == 'dragging') return;
+
+  var {x, y} = getBoardPos(event);
+  if (x < 0 || y < 0 || x > 9 || y > 9) return;
+  
+  state.board[y][x] = state.movingPiece.piece;
+  state.movingPiece = null;
+  state.action = 'idle'
+  renderBoard();
+  
+  if (true) { // isLegal
+    // state.board[y][x] = 
   }
 }
 
@@ -264,8 +321,7 @@ function hoverOverChecker(event) {
   // Make sure we have a canvas context to render to
   if(!ctx) return;
   renderBoard();
-  var x = Math.floor(event.clientX / canvas.offsetWidth * 10);
-  var y = Math.floor(event.clientY / canvas.offsetHeight * 10);
+  var {x, y} = getBoardPos(event);
   // console.log(x, y);
   if(state.board[y][x] && state.board[y][x].charAt(0) === state.turn) {
     // Highlight the checker to move
@@ -283,6 +339,8 @@ function setup() {
   canvas.width = 1000;
   canvas.height = 1000;
   canvas.onmousemove = handleMouseMove;
+  canvas.onmousedown = handleMouseDown;
+  canvas.onmouseup = handleMouseUp;
   document.body.appendChild(canvas);
   ctx = canvas.getContext('2d');
   renderBoard();
